@@ -6,6 +6,6 @@
 #define RASPICVTEST_RGB2NAME_H
 
 #include <vector>
-
-int rgb2name(std::vector<double> rgb);
+#include <string>
+std::string rgb2name(std::vector<double> inputRGB);
 #endif //RASPICVTEST_RGB2NAME_H

@@ -7,8 +7,6 @@
 using namespace cv;
 using namespace std;
 
-string name(int name);
-
 int main(int argc, char **argv) {
     std::cerr << "start" << std::endl;
     int64 startTick = cv::getTickCount();
@@ -79,29 +77,16 @@ int main(int argc, char **argv) {
          a < totalFoundColors.size(); a++) {
         for (std::vector<int>::size_type b = (std::vector<int>::size_type) 0;
              b < totalFoundColors[a].size(); b++) {
-            string colorName = name(rgb2name(totalFoundColors[a][b]));
+            string colorName = rgb2name(totalFoundColors[a][b]);
             printf("%6s\t", colorName.c_str());
             if ((b+1) % 4 == 0) printf("\n");
         }
         printf("\n");
     }
+    std::cout << "wrote color names in " << ((getTickCount() - endTick) / cv::getTickFrequency())
+              << std::endl;
     return 0;
 }
 
-string name(int name) {
-    if (name == 0) {
-        return std::__cxx11::string("Red");
-    } else if (name == 1) {
-        return std::__cxx11::string("Yellow");
-    } else if (name == 2) {
-        return std::__cxx11::string("Green");
-    } else if (name == 3) {
-        return std::__cxx11::string("Blue");
-    } else if (name == 4) {
-        return std::__cxx11::string("Black");
-    } else if (name == 5) {
-        return std::__cxx11::string("White");
-    }
-    return std::__cxx11::string(" ");
-}
+
 
