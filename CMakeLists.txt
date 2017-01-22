@@ -10,7 +10,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
-set(SOURCE_FILES main.cpp)
+set(SOURCE_FILES main.cpp rgb2name.cpp rgb2name.h)
 add_executable(RaspiCVTest ${SOURCE_FILES})
 
 # add libs you need

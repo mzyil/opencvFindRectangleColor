@@ -3,9 +3,11 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
-
+#include "rgb2name.h"
 using namespace cv;
 using namespace std;
+
+string name(int name);
 
 int main(int argc, char **argv) {
     std::cerr << "start" << std::endl;
@@ -23,6 +25,7 @@ int main(int argc, char **argv) {
     moveWindow("found", 1300, 300);
 
     cv::Mat currFrame;
+    vector<vector<vector<double>>> totalFoundColors;
     int i = 0;
     for (;; i++) {
         capture >> currFrame;
@@ -35,20 +38,20 @@ int main(int argc, char **argv) {
         cv::Mat tempFrame;
         cvtColor(currFrame, tempFrame, cv::COLOR_BGR2GRAY);
 
-        cv::GaussianBlur(tempFrame, tempFrame, cv::Size(3, 3), 0, 0);
-        //threshold(tempFrame, tempFrame, 200, 255, THRESH_BINARY_INV);
+        cv::GaussianBlur(tempFrame, tempFrame, cv::Size(5, 5), 0, 0);
+        threshold(tempFrame, tempFrame, 150, 255, THRESH_BINARY_INV);
         imshow("gray&gaussian", tempFrame);
 
-        cv::Canny(tempFrame, tempFrame, 200, 225);
+        //cv::Canny(tempFrame, tempFrame, 500, 500);
         imshow("canny", tempFrame);
 
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
-        findContours(tempFrame, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+        findContours(tempFrame, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
 
         Mat foundFrame(350, 350, CV_8UC3, Scalar(0, 0, 0));
-
         int contourSize = contours.size();
+        vector<vector<double>> foundColorsInFrame;
         for (int j = 0; j < contourSize; j++) {
             vector<Point2f> approx;
             if (contours[j].size() == 0) continue;
@@ -59,13 +62,46 @@ int main(int argc, char **argv) {
                 Mat1b mask(roi.rows, roi.cols);
                 Scalar meanVals = mean(roi, mask);
                 rectangle(foundFrame, boundRect, meanVals, -1);
+                foundColorsInFrame.push_back({meanVals[2], meanVals[1], meanVals[0]});
+                //cout << meanVals[0] << " " << meanVals[1] << " " << meanVals[2];
             }
+        }
+        if (foundColorsInFrame.size() == 16) {
+            totalFoundColors.push_back(foundColorsInFrame);
         }
         imshow("found", foundFrame);
         waitKey(1);
     }
-    std::cout << "read " << i << " frames in " << ((cv::getTickCount() - startTick) / cv::getTickFrequency())
+    int64 endTick = cv::getTickCount();
+    std::cout << "read " << i << " frames in " << ((endTick - startTick) / cv::getTickFrequency())
               << std::endl;
-
+    for (std::vector<int>::size_type a = (std::vector<int>::size_type) 0;
+         a < totalFoundColors.size(); a++) {
+        for (std::vector<int>::size_type b = (std::vector<int>::size_type) 0;
+             b < totalFoundColors[a].size(); b++) {
+            string colorName = name(rgb2name(totalFoundColors[a][b]));
+            printf("%6s\t", colorName.c_str());
+            if ((b+1) % 4 == 0) printf("\n");
+        }
+        printf("\n");
+    }
     return 0;
 }
+
+string name(int name) {
+    if (name == 0) {
+        return std::__cxx11::string("Red");
+    } else if (name == 1) {
+        return std::__cxx11::string("Yellow");
+    } else if (name == 2) {
+        return std::__cxx11::string("Green");
+    } else if (name == 3) {
+        return std::__cxx11::string("Blue");
+    } else if (name == 4) {
+        return std::__cxx11::string("Black");
+    } else if (name == 5) {
+        return std::__cxx11::string("White");
+    }
+    return std::__cxx11::string(" ");
+}
+
