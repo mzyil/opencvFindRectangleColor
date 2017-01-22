@@ -16,7 +16,7 @@ vector<vector<double>> RGB2NAME_KNOWN_COLORS = {
 };
 
 double euclideanDist(vector<double> rgb1, vector<double> rgb2) {
-    return sqrt(pow(abs(rgb1[0] - rgb2[0]), 2) + pow(abs(rgb1[1] - rgb2[1]), 2) + pow(abs(rgb1[2] - rgb2[2]), 2));
+    return pow(abs(rgb1[0] - rgb2[0]), 2) + pow(abs(rgb1[1] - rgb2[1]), 2) + pow(abs(rgb1[2] - rgb2[2]), 2);
 }
 
 /*
