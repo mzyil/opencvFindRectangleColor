@@ -4,6 +4,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <iostream>
 #include "rgb2name.h"
+
 using namespace cv;
 using namespace std;
 
@@ -45,7 +46,7 @@ int main(int argc, char **argv) {
 
         vector<vector<Point>> contours;
         vector<Vec4i> hierarchy;
-        findContours(tempFrame, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE, Point(0, 0));
+        findContours(tempFrame, contours, hierarchy, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_TC89_L1, Point(0, 0));
 
         Mat foundFrame(350, 350, CV_8UC3, Scalar(0, 0, 0));
         int contourSize = contours.size();
@@ -55,6 +56,7 @@ int main(int argc, char **argv) {
             if (contours[j].size() == 0) continue;
             approxPolyDP(contours[j], approx, arcLength(contours[j], true) * 0.02, true);
             if (approx.size() == 4) {
+
                 Rect boundRect = boundingRect(approx);
                 Mat roi = currFrame(boundRect);
                 Mat1b mask(roi.rows, roi.cols);
@@ -64,7 +66,7 @@ int main(int argc, char **argv) {
                 //cout << meanVals[0] << " " << meanVals[1] << " " << meanVals[2];
             }
         }
-        if (foundColorsInFrame.size() == 16) {
+        if (foundColorsInFrame.size() == 16) {//TODO: sort foundColorsInFrame s before pushing
             totalFoundColors.push_back(foundColorsInFrame);
         }
         imshow("found", foundFrame);
@@ -73,15 +75,24 @@ int main(int argc, char **argv) {
     int64 endTick = cv::getTickCount();
     std::cout << "read " << i << " frames in " << ((endTick - startTick) / cv::getTickFrequency())
               << std::endl;
-    for (std::vector<int>::size_type a = (std::vector<int>::size_type) 0;
-         a < totalFoundColors.size(); a++) {
-        for (std::vector<int>::size_type b = (std::vector<int>::size_type) 0;
-             b < totalFoundColors[a].size(); b++) {
+    string lastNameMatrix("");
+    for (std::vector<int>::size_type a = totalFoundColors.size() - 1;
+         a != (std::vector<int>::size_type) -1; a--) {
+        string nameMatrix("");
+        for (std::vector<int>::size_type b = totalFoundColors[a].size() - 1;
+             b != (std::vector<int>::size_type) -1; b--) {
             string colorName = rgb2name(totalFoundColors[a][b]);
-            printf("%6s\t", colorName.c_str());
-            if ((b+1) % 4 == 0) printf("\n");
+            auto format = "%6s\t";
+            auto size = snprintf(nullptr, 0, format, colorName.c_str());
+            std::string output((unsigned int) size, ' ');
+            sprintf(&output[0], format, colorName.c_str());
+            nameMatrix += output;
+            if (b % 4 == 0) nameMatrix += "\n";
         }
-        printf("\n");
+        if (nameMatrix.compare(lastNameMatrix) != 0) {
+            printf("%s\n", nameMatrix.c_str());
+            lastNameMatrix = nameMatrix;
+        }
     }
     std::cout << "wrote color names in " << ((getTickCount() - endTick) / cv::getTickFrequency())
               << std::endl;

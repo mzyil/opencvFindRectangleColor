@@ -8,4 +8,5 @@
 #include <vector>
 #include <string>
 std::string rgb2name(std::vector<double> inputRGB);
-#endif //RASPICVTEST_RGB2NAME_H
+
+#endif //RASPICVTEST_RGB2NAME_HZZ
